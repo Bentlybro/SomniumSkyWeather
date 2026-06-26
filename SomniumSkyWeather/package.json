@@ -1,0 +1,27 @@
+{
+  "name": "com.bentlybro.somniumskyweather",
+  "version": "1.0.0",
+  "displayName": "Somnium Sky & Weather",
+  "description": "Drop-in sky & weather system for Somnium Space worlds: procedural day/night sky, volumetric raymarched clouds, 9 weather presets, raymarched aurora, lightning, fog, wind, and multiplayer-synced time/weather with zero networking. URP.",
+  "unity": "6000.0",
+  "keywords": [
+    "somnium",
+    "somnium-space",
+    "sky",
+    "weather",
+    "skybox",
+    "volumetric-clouds",
+    "aurora",
+    "urp",
+    "vr"
+  ],
+  "author": {
+    "name": "Bentlybro",
+    "url": "https://github.com/Bentlybro"
+  },
+  "license": "MIT",
+  "documentationUrl": "https://github.com/Bentlybro/SomniumSkyWeather",
+  "changelogUrl": "https://github.com/Bentlybro/SomniumSkyWeather/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Bentlybro/SomniumSkyWeather/blob/main/LICENSE",
+  "hideInEditor": false
+}

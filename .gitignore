@@ -1,0 +1,41 @@
+# ---- Unity generated ----
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+[Rr]ecordings/
+
+# ---- IDE / OS ----
+.vs/
+.idea/
+.gradle/
+ExportedObj/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.DS_Store
+Thumbs.db
+
+# ---- Build artifacts ----
+*.apk
+*.aab
+*.app
+*.unitypackage
+crashlytics-build.properties
+sysinfo.txt
+
+# NOTE: .meta files are intentionally NOT ignored — Unity needs them committed.

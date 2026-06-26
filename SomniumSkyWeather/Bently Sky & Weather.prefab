@@ -1,0 +1,332 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6482742053532362903
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2325176740331261291}
+  - component: {fileID: 7852681509839476194}
+  m_Layer: 0
+  m_Name: Precipitation
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2325176740331261291
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6482742053532362903}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1737875616578706003}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7852681509839476194
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6482742053532362903}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f8e80630eef3b44980a904c78bfc222, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bently.Weather::SomniumSpace.Worlds.Bently.Weather.WeatherParticles
+  coverage: 0
+  useGlobalWeather: 1
+  localRain: 0
+  localSnow: 0
+  followTarget: {fileID: 0}
+  spawnHeight: 16
+  areaRadius: 28
+  maxRainRate: 7000
+  maxSnowRate: 1400
+--- !u!1 &8287772166915130302
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1737875616578706003}
+  - component: {fileID: 3930552963463446788}
+  - component: {fileID: 1083971205836580769}
+  m_Layer: 0
+  m_Name: Bently Sky & Weather
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1737875616578706003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8287772166915130302}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2325176740331261291}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3930552963463446788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8287772166915130302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4037545c7906464baecd0b65106d665, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bently.Weather::SomniumSpace.Worlds.Bently.Weather.SkyWeather
+  timeOfDay: 10
+  autoAdvance: 1
+  dayLengthSeconds: 900
+  sunAzimuth: 160
+  animateInEditor: 0
+  sunLight: {fileID: 0}
+  skyboxMaterialOverride: {fileID: 2100000, guid: 408f3aa704f73ed4ea65b2828e9863ed,
+    type: 2}
+  cloudNoise: {fileID: 11700000, guid: 0bb3de57d1cc7a145b32b22f934c4ec2, type: 2}
+  starSky: {fileID: 8900000, guid: 895f0e2e85b5ba24597c9fad68704cce, type: 2}
+  moonTexture: {fileID: 2800000, guid: ab1a57b2d3c318148846630b8c8ae191, type: 2}
+  sunColor:
+    serializedVersion: 2
+    key0: {r: 0.95, g: 0.45, b: 0.22, a: 1}
+    key1: {r: 1, g: 0.72, b: 0.5, a: 1}
+    key2: {r: 1, g: 0.96, b: 0.9, a: 0}
+    key3: {r: 1, g: 0.99, b: 0.97, a: 0}
+    key4: {r: 0, g: 0, b: 0, a: 0}
+    key5: {r: 0, g: 0, b: 0, a: 0}
+    key6: {r: 0, g: 0, b: 0, a: 0}
+    key7: {r: 0, g: 0, b: 0, a: 0}
+    ctime0: 0
+    ctime1: 11796
+    ctime2: 29491
+    ctime3: 65535
+    ctime4: 0
+    ctime5: 0
+    ctime6: 0
+    ctime7: 0
+    atime0: 0
+    atime1: 65535
+    atime2: 0
+    atime3: 0
+    atime4: 0
+    atime5: 0
+    atime6: 0
+    atime7: 0
+    m_Mode: 0
+    m_ColorSpace: -1
+    m_NumColorKeys: 4
+    m_NumAlphaKeys: 2
+  sunIntensity:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 1.3
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1.3
+      inSlope: 1.3
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  moonColor: {r: 0.55, g: 0.62, b: 0.85, a: 1}
+  moonIntensity: 0.12
+  ambientStrength: 1
+  baseExposure: 1.15
+  windHeading: 90
+  cloudSpeed: 0.03
+  lightningEnabled: 1
+  cloudType: 0.8
+  cloudScale: 2
+  cloudDetail: 0.45
+  cloudBottom: 1.3
+  cloudThickness: 2.4
+  cloudAbsorption: 1.3
+  cloudFade: 0.045
+  curvatureRadius: 90
+  cloudSteps: 40
+  sunSize: 0.0009
+  moonSize: 0.0016
+  starIntensity: 1.4
+  auroraEnabled: 1
+  auroraChance: 0.6
+  auroraIntensity: 1
+  auroraCoverage: 0.8
+  auroraColor1: {r: 0.7, g: 0.2, b: 1, a: 1}
+  auroraColor2: {r: 0.15, g: 1, b: 0.5, a: 1}
+  auroraColor3: {r: 1, g: 0.25, b: 0.45, a: 1}
+  auroraSeed: 777
+  weatherTypes:
+  - name: Clear
+    cloudCoverage: 0.2
+    cloudDensity: 5
+    cloudOpacity: 0.85
+    cloudColor: {r: 1, g: 0.98, b: 0.95, a: 1}
+    cloudShadow: {r: 0.42, g: 0.48, b: 0.6, a: 1}
+    skyExposure: 1.05
+    fog: 0
+    fogColor: {r: 0.62, g: 0.66, b: 0.72, a: 1}
+    rain: 0
+    snow: 0
+    wind: 0.15
+    lightning: 0
+  - name: Partly Cloudy
+    cloudCoverage: 0.45
+    cloudDensity: 6
+    cloudOpacity: 1
+    cloudColor: {r: 1, g: 0.98, b: 0.95, a: 1}
+    cloudShadow: {r: 0.42, g: 0.48, b: 0.6, a: 1}
+    skyExposure: 1
+    fog: 0
+    fogColor: {r: 0.62, g: 0.66, b: 0.72, a: 1}
+    rain: 0
+    snow: 0
+    wind: 0.3
+    lightning: 0
+  - name: Overcast
+    cloudCoverage: 0.85
+    cloudDensity: 7.5
+    cloudOpacity: 1
+    cloudColor: {r: 0.78, g: 0.8, b: 0.84, a: 1}
+    cloudShadow: {r: 0.45, g: 0.48, b: 0.55, a: 1}
+    skyExposure: 0.8
+    fog: 0.15
+    fogColor: {r: 0.62, g: 0.66, b: 0.72, a: 1}
+    rain: 0
+    snow: 0
+    wind: 0.45
+    lightning: 0
+  - name: Light Rain
+    cloudCoverage: 0.72
+    cloudDensity: 6.5
+    cloudOpacity: 1
+    cloudColor: {r: 0.7, g: 0.73, b: 0.78, a: 1}
+    cloudShadow: {r: 0.42, g: 0.45, b: 0.52, a: 1}
+    skyExposure: 0.9
+    fog: 0.12
+    fogColor: {r: 0.6, g: 0.63, b: 0.68, a: 1}
+    rain: 0.35
+    snow: 0
+    wind: 0.25
+    lightning: 0
+  - name: Rain
+    cloudCoverage: 0.92
+    cloudDensity: 8.5
+    cloudOpacity: 1
+    cloudColor: {r: 0.62, g: 0.65, b: 0.7, a: 1}
+    cloudShadow: {r: 0.34, g: 0.37, b: 0.43, a: 1}
+    skyExposure: 0.65
+    fog: 0.35
+    fogColor: {r: 0.52, g: 0.55, b: 0.6, a: 1}
+    rain: 0.8
+    snow: 0
+    wind: 0.6
+    lightning: 0
+  - name: Storm
+    cloudCoverage: 0.97
+    cloudDensity: 9
+    cloudOpacity: 1
+    cloudColor: {r: 0.48, g: 0.5, b: 0.55, a: 1}
+    cloudShadow: {r: 0.22, g: 0.24, b: 0.3, a: 1}
+    skyExposure: 0.5
+    fog: 0.45
+    fogColor: {r: 0.42, g: 0.45, b: 0.5, a: 1}
+    rain: 1
+    snow: 0
+    wind: 1
+    lightning: 1
+  - name: Light Snow
+    cloudCoverage: 0.7
+    cloudDensity: 6.5
+    cloudOpacity: 1
+    cloudColor: {r: 0.86, g: 0.88, b: 0.93, a: 1}
+    cloudShadow: {r: 0.58, g: 0.61, b: 0.69, a: 1}
+    skyExposure: 0.92
+    fog: 0.2
+    fogColor: {r: 0.82, g: 0.85, b: 0.9, a: 1}
+    rain: 0
+    snow: 0.35
+    wind: 0.18
+    lightning: 0
+  - name: Blizzard
+    cloudCoverage: 0.98
+    cloudDensity: 8.5
+    cloudOpacity: 1
+    cloudColor: {r: 0.7, g: 0.73, b: 0.8, a: 1}
+    cloudShadow: {r: 0.4, g: 0.43, b: 0.5, a: 1}
+    skyExposure: 0.68
+    fog: 0.75
+    fogColor: {r: 0.8, g: 0.83, b: 0.88, a: 1}
+    rain: 0
+    snow: 1
+    wind: 1
+    lightning: 0
+  - name: Fog
+    cloudCoverage: 0.6
+    cloudDensity: 5
+    cloudOpacity: 0.8
+    cloudColor: {r: 1, g: 0.98, b: 0.95, a: 1}
+    cloudShadow: {r: 0.42, g: 0.48, b: 0.6, a: 1}
+    skyExposure: 0.8
+    fog: 0.85
+    fogColor: {r: 0.72, g: 0.75, b: 0.8, a: 1}
+    rain: 0
+    snow: 0
+    wind: 0.1
+    lightning: 0
+  startWeatherIndex: 1
+  weatherBlendSeconds: 0
+  autoWeather: 1
+  autoWeatherInterval: {x: 90, y: 240}
+  synchronized: 1
+  weatherPeriodSeconds: 240
+  weatherSeed: 12345
+--- !u!114 &1083971205836580769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8287772166915130302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59e461108d8d04d49ad113cfacab9577, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Bently.Weather::SomniumSpace.Worlds.Bently.Weather.SomniumWeatherIntegration
+  registerEnvironment: 1
+  followLocalPlayer: 1

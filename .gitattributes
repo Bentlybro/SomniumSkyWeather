@@ -1,0 +1,22 @@
+# Protect Unity binary-serialized assets from line-ending conversion / corruption.
+*.asset    binary
+*.cubemap  binary
+*.png      binary
+*.jpg      binary
+*.jpeg     binary
+*.tga      binary
+*.psd      binary
+*.fbx      binary
+*.unitypackage binary
+
+# Unity YAML files are text (LF) and merge fine as text.
+*.cs       text eol=lf
+*.shader   text eol=lf
+*.cginc    text eol=lf
+*.hlsl     text eol=lf
+*.asmdef   text eol=lf
+*.meta     text eol=lf
+*.unity    text eol=lf
+*.prefab   text eol=lf
+*.mat      text eol=lf
+*.md       text eol=lf
