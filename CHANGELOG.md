@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.1.0 — 2026-06-26
+
+Night-sky & aurora quality pass.
+
+- **Localized aurora cloud-glow** — clouds are now lit green **only where the aurora curtain actually hangs overhead** (sampled from the aurora's plan-view footprint), instead of a flat wash across every cloud.
+- **HDR star cubemap** — `StarSky.cubemap` now bakes as 16-bit half-float instead of 8-bit, killing the banding "rings" in the faint Milky Way glow. The Milky Way also gained multi-octave nebulosity, dark dust lanes, and a brighter galactic core so it reads as a galaxy, not soft blobs.
+- **Sky dither** — sub-pixel triangular-PDF dither on the final colour removes 8-bit banding in the dark sky/fog gradients.
+- Docs: how to fold the system into a world that already has its own scripting assembly (assembly merge + namespace requirement).
+
 ## 1.0.0 — 2026-06-26
 
 Initial public release.

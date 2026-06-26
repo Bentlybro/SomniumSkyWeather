@@ -67,7 +67,7 @@ SomniumSkyWeather renders the **entire sky — including raymarched volumetric c
 https://github.com/Bentlybro/SomniumSkyWeather.git?path=/SomniumSkyWeather
 ```
 
-Append `#v1.0.0` to pin a release. ⚠️ **Don't use this route for Somnium** (see the warning above).
+Append `#v1.1.0` to pin a release. ⚠️ **Don't use this route for Somnium** (see the warning above).
 
 Then:
 
@@ -80,6 +80,23 @@ The scene's Directional Light is auto-adopted as the sun; if there isn't one, it
 > **Try it now:** open **`SomniumSkyWeather/Demo/SomniumSkyWeather Demo.unity`** and press Play.
 
 > The internal assembly and namespace are named `Bently.Weather` (that's the value for the uploader's *Scripting Assembly* field). The shader is `Bently/SkyDome`. Only the package/repo is named *SomniumSkyWeather*.
+
+---
+
+## Adding it to a world that already has its own scripting assembly
+
+A Somnium world bundles **exactly one** scripting assembly. The drop-in above ships its own (`Bently.Weather`) — perfect for a fresh world. But if your project **already** has its own assembly (e.g. `MyWorld`), a second assembly won't ride along on upload: the weather scripts get dropped, the prefab's `SkyWeather`/`WeatherParticles` turn into *missing scripts*, and the shader/material/textures they reference fall out of the bundle → **black sky / "missing shaders."**
+
+Fold the weather **into your world's assembly**:
+
+1. **Delete** `SomniumSkyWeather/Bently.Weather.asmdef` (+ its `.meta`). The runtime scripts now compile into the nearest parent asmdef — your world assembly.
+2. **Repoint** `Editor/Bently.Weather.Editor.asmdef`: set its `references` to your world assembly's name.
+3. **Re-namespace** the scripts to start with your assembly's **root namespace** — Somnium's validator rejects any script whose namespace doesn't begin with it. Find-and-replace across the package:
+   `SomniumSpace.Worlds.Bently.Weather` → `<your.root.namespace>.Weather`
+   covering the 4 Runtime + 2 Editor scripts, the editor asmdef's `rootNamespace`, **and** the prefab's `m_EditorClassIdentifier` lines (`Bently.Weather::…` → `<YourAssembly>::…`).
+4. If your own code resolves the system by string — `Type.GetType("SomniumSpace.Worlds.Bently.Weather.SkyWeather, Bently.Weather")` — update **both** the namespace and the trailing assembly name there.
+
+Prefabs and scenes reference scripts by **file-GUID**, not by type name, so none of this breaks the prefab links. Finally, set the uploader's **Scripting Assembly** to your world assembly and upload.
 
 ---
 

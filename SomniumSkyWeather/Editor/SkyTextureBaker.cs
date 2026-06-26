@@ -64,8 +64,12 @@ namespace SomniumSpace.Worlds.Bently.Weather.EditorTools
         public static Cubemap BakeStarCubemap()
         {
             int S = StarFace;
-            var cube = new Cubemap(S, TextureFormat.RGBA32, true) { name = "StarSky", wrapMode = TextureWrapMode.Clamp };
+            // RGBAHalf (16-bit float), NOT RGBA32: the Milky Way is a faint, smooth, low-luminance glow.
+            // In an 8-bit texture that glow quantises into visible "rings"/bands; half-float stores the
+            // gradient smoothly so it reads as diffuse light. (Stars are tiny bright points either way.)
+            var cube = new Cubemap(S, TextureFormat.RGBAHalf, true) { name = "StarSky", wrapMode = TextureWrapMode.Clamp };
             Vector3 galacticNormal = new Vector3(0.35f, 0.30f, 0.88f).normalized;
+            Vector3 coreDir = new Vector3(-0.15f, -0.05f, -0.99f).normalized;   // bright galactic-centre bulge
 
             for (int face = 0; face < 6; face++)
             {
@@ -78,17 +82,23 @@ namespace SomniumSpace.Worlds.Bently.Weather.EditorTools
                         float v = (y + 0.5f) / S * 2f - 1f;
                         Vector3 dir = FaceDir(face, u, v).normalized;
 
-                        // Stars: sparse, slight colour temperature + brightness variation.
-                        float s = StarValue(dir, 720f, 0);
+                        // Stars: sparse points, slight colour temperature + brightness variation (3 layers).
+                        float s  = StarValue(dir, 720f, 0);
                         float s2 = StarValue(dir, 1500f, 99) * 0.6f;     // faint dense layer
-                        float star = Mathf.Max(s, s2);
+                        float s3 = StarValue(dir, 3000f, 7)  * 0.32f;    // very faint dust of stars
+                        float star = Mathf.Max(Mathf.Max(s, s2), s3);
                         Color starCol = Color.Lerp(new Color(0.7f, 0.8f, 1f), new Color(1f, 0.85f, 0.65f), Hash1Dir(dir, 5));
 
-                        // Milky Way band: bright noisy band around the galactic plane.
-                        float band = 1f - Mathf.SmoothStep(0f, 0.32f, Mathf.Abs(Vector3.Dot(dir, galacticNormal)));
-                        float milkN = 0.5f + 0.5f * FbmDir(dir, 3, 0);
-                        float milk = band * band * milkN * 0.18f;
-                        Color milkCol = new Color(0.45f, 0.5f, 0.7f) * milk;
+                        // Milky Way: soft glow hugging the galactic plane, broken up by multi-octave
+                        // nebulosity and dark dust lanes, brightening toward the galactic centre. The
+                        // extra octaves + half-float keep it looking like real diffuse glow, not blobs.
+                        float planar = Mathf.Abs(Vector3.Dot(dir, galacticNormal));
+                        float band   = 1f - Mathf.SmoothStep(0f, 0.30f, planar);
+                        float nebula = Clamp01(0.5f + 0.5f * FbmDir(dir * 1.6f, 5, 0));                      // cloud structure
+                        float dust   = Mathf.SmoothStep(0.30f, 0.70f, 0.5f + 0.5f * FbmDir(dir * 3.4f, 4, 71)); // dark lanes
+                        float core   = Mathf.Pow(Clamp01(Vector3.Dot(dir, coreDir)), 5f);                   // bulge falloff
+                        float milk   = band * band * nebula * (1f - 0.6f * dust) * (0.10f + 0.55f * core);
+                        Color milkCol = Color.Lerp(new Color(0.40f, 0.47f, 0.72f), new Color(0.95f, 0.78f, 0.62f), core) * milk;
 
                         Color c = starCol * star + milkCol;
                         px[y * S + x] = new Color(c.r, c.g, c.b, 1f);

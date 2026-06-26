@@ -236,6 +236,20 @@ Shader "Bently/SkyDome"
                 float silver = pow(saturate(ndl), 6.0);
                 float3 sunCol = lerp(_CloudShadowColor.rgb, _CloudColor.rgb, dayAmt);
 
+                // Localized aurora skyglow: only clouds sitting directly under the curtain get kissed
+                // green. Sample the aurora's plan-view footprint (ribbon x region-envelope x near-player)
+                // once for this cloud column so the glow tracks where the aurora actually hangs overhead.
+                float auroraGlow = 0.0;
+                if (_AuroraIntensity > 0.001)
+                {
+                    float3 pc = rd * ((tStart + tEnd) * 0.5);
+                    float2 aUV = pc.xz * 0.04;
+                    float aWind = _Time.y * 0.015;
+                    float aRibbon = exp(-abs(fbm(aUV * 0.3 + float2(aWind, aWind * 0.6)) - 0.5) * 28.0);
+                    float aEnv = smoothstep(1.0 - _AuroraCoverage, 1.0, fbm(aUV * 0.12 + float2(aWind * 0.5, aWind * 0.3)));
+                    auroraGlow = aRibbon * aEnv * saturate(1.0 - length(pc.xz) * 0.006);
+                }
+
                 float transmittance = 1.0;
                 int steps = (int)_CloudSteps;
                 [loop]
@@ -252,7 +266,7 @@ Shader "Bently/SkyDome"
                         float energy = lightT * (phase + 0.55) * (1.0 + silver * 1.6) + ms * 0.55 + 0.05 * dayAmt + 0.03;
                         float3 lit = (sunCol * energy + _CloudShadowColor.rgb * 0.22 * (1.0 - lightT) * dayAmt) * lightLevel;
                         lit += _CloudColor.rgb * _CloudFlash * (0.6 + 0.8 * (1.0 - lightT));  // lightning lights the cloud from within
-                        lit += _AuroraColor2.rgb * (_AuroraIntensity * 0.10);                // aurora skyglow (green) tints nearby clouds
+                        lit += _AuroraColor2.rgb * (_AuroraIntensity * auroraGlow * 0.40);    // glow ONLY where the curtain hangs overhead
                         lit = lerp(skyColor, lit, exp(-t * _CloudFade));               // atmospheric distance fade
 
                         float stepT = exp(-d * stepLen * _CloudAbsorption);
@@ -413,6 +427,12 @@ Shader "Bently/SkyDome"
                 // not just on scene geometry). Strong at the horizon, fades out toward the zenith.
                 float fogH = saturate(1.0 - elev * 1.8);
                 col = lerp(col, _SkyFogColor.rgb, saturate(_SkyFog * fogH));
+
+                // Kill 8-bit banding in the smooth dark sky/fog gradients. Dark night skies are where
+                // quantization "rungs"/blobs show worst, so add a sub-LSB triangular-PDF dither (two
+                // decorrelated IGN samples -> triangular noise, hides bands without looking grainy).
+                float dth = frac(52.9829189 * frac(dot(i.pos.xy + 137.13, float2(0.06711056, 0.00583715))));
+                col += (ign + dth - 1.0) * (1.6 / 255.0);
 
                 return fixed4(col, 1.0);
             }
