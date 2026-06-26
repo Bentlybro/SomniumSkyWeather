@@ -104,11 +104,16 @@ namespace SomniumSpace.Worlds.Bently.Weather
             ConfigureRain(_rain);
             _rainEm = _rain.emission;
             _rainVel = _rain.velocityOverLifetime;
+            if (collideWithWorld) BuildRainSplash(_rain);   // droplet burst where rain hits a surface
 
             _snow = MakeSystem("Snow", _snowMat, ParticleSystemRenderMode.Billboard);
             ConfigureSnow(_snow);
             _snowEm = _snow.emission;
             _snowVel = _snow.velocityOverLifetime;
+
+            // play AFTER sub-emitters are registered so the splash triggers reliably
+            _rain.Play();
+            _snow.Play();
         }
 
         ParticleSystem MakeSystem(string name, Material mat, ParticleSystemRenderMode mode)
@@ -121,7 +126,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
             var main = ps.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.maxParticles = 12000;
-            main.playOnAwake = true;
+            main.playOnAwake = false;   // Build() plays explicitly once sub-emitters are wired
 
             var em = ps.emission;
             em.rateOverTime = 0f;
@@ -141,8 +146,50 @@ namespace SomniumSpace.Worlds.Bently.Weather
                 renderer.velocityScale = 0.0f;
                 renderer.lengthScale = 7.0f;     // long thin streaks
             }
-            ps.Play();
             return ps;
+        }
+
+        // A little upward droplet burst spawned where each rain particle hits a surface (a sub-emitter
+        // fired on the rain system's Collision event). Reuses the soft-dot rain material.
+        void BuildRainSplash(ParticleSystem rain)
+        {
+            var go = new GameObject("RainSplash");
+            go.transform.SetParent(rain.transform, false);
+            var sp = go.AddComponent<ParticleSystem>();
+            sp.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+
+            var main = sp.main;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+            main.startLifetime = 0.35f;
+            main.startSpeed = new ParticleSystem.MinMaxCurve(1.2f, 2.8f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.015f, 0.04f);
+            main.startColor = new Color(0.82f, 0.88f, 0.97f, 0.7f);
+            main.gravityModifier = 2.2f;          // pop up, then fall straight back down
+            main.maxParticles = 2000;
+            main.playOnAwake = false;
+
+            var em = sp.emission;
+            em.enabled = true;
+            em.rateOverTime = 0f;                 // emits only when the sub-emitter is triggered
+            em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)4, (short)7, 1, 0.01f) });
+
+            var shape = sp.shape;
+            shape.enabled = true;
+            shape.shapeType = ParticleSystemShapeType.Cone;
+            shape.angle = 32f;                    // a little crown
+            shape.radius = 0.02f;
+            shape.rotation = new Vector3(-90f, 0f, 0f);   // emit upward
+
+            var r = go.GetComponent<ParticleSystemRenderer>();
+            r.renderMode = ParticleSystemRenderMode.Billboard;
+            r.material = _rainMat;
+            r.alignment = ParticleSystemRenderSpace.View;
+            r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            r.receiveShadows = false;
+
+            var sub = rain.subEmitters;
+            sub.enabled = true;
+            sub.AddSubEmitter(sp, ParticleSystemSubEmitterType.Collision, ParticleSystemSubEmitterProperties.InheritNothing);
         }
 
         void ConfigureRain(ParticleSystem ps)

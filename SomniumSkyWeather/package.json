@@ -1,6 +1,6 @@
 {
   "name": "com.bentlybro.somniumskyweather",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "displayName": "Somnium Sky & Weather",
   "description": "Drop-in sky & weather system for Somnium Space worlds: procedural day/night sky, volumetric raymarched clouds, 9 weather presets, raymarched aurora, lightning, fog, wind, and multiplayer-synced time/weather with zero networking. URP.",
   "unity": "6000.0",
