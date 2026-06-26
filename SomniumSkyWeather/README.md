@@ -14,7 +14,7 @@ Somnium worlds ship as an **AssetBundle + one scripting assembly** and **cannot 
 
 SomniumSkyWeather renders the **entire sky — including raymarched volumetric clouds and aurora — through a procedural skybox material on `RenderSettings.skybox`.** That's the one path proven to render reliably in Somnium's URP: no render feature, no depth texture, no camera-binding bugs. Everything else uses stock `RenderSettings`, `Light`, and `ParticleSystem`. No blocked APIs → it passes the Somnium scripting validator.
 
-> **Important:** the sky shader is referenced through the shipped **`SkyDome.mat`** (already assigned on the prefab). A shader referenced only by `Shader.Find` gets **stripped from the world bundle** and you'd get a black sky. Keep `SkyDome.mat` assigned to the prefab's *Skybox Material Override* — it's what pulls the shader into the bundle.
+> **Important (Somnium):** install this under **`Assets/`**, _not_ via the Package Manager — Somnium doesn't bundle the assets inside a UPM package (`Packages/…`), so a Package-Manager install ships with **no sky shader/material/textures → black sky** (see Install). Also keep the shipped **`SkyDome.mat`** assigned to the prefab's *Skybox Material Override*: it's what pulls the shader into the bundle (a shader referenced only by `Shader.Find` gets stripped).
 
 ---
 
@@ -41,11 +41,11 @@ SomniumSkyWeather renders the **entire sky — including raymarched volumetric c
 
 ## Install
 
-**Unity Package Manager (git URL)** — open *Window ▸ Package Manager ▸ ➕ ▸ Add package from git URL…* and paste:
+> ⚠️ **For Somnium, install it under `Assets/` — not via the Package Manager.** Somnium ships your `Assets/` + scripting assemblies but **not the assets inside a UPM package** (`Packages/…`), so a Package-Manager install gives a **black sky** (no shader/material/textures in the bundle).
 
-`https://github.com/Bentlybro/SomniumSkyWeather.git?path=/SomniumSkyWeather`
+**Recommended (Somnium) — put it in `Assets/`:** copy the **`SomniumSkyWeather`** folder into your project's **`Assets/`**, **or** `git clone https://github.com/Bentlybro/SomniumSkyWeather.git` and move its inner **`SomniumSkyWeather`** folder into **`Assets/`** (make sure it lands *inside* `Assets/`).
 
-(append `#v1.0.0` to pin a release). **Or** copy the **`SomniumSkyWeather`** folder into your project's `Assets/`.
+**Non-Somnium URP only — Package Manager (git URL):** *Window ▸ Package Manager ▸ ➕ ▸ Add package from git URL…* → `https://github.com/Bentlybro/SomniumSkyWeather.git?path=/SomniumSkyWeather` (append `#v1.0.0` to pin). ⚠️ Not for Somnium — see above.
 
 Then:
 
