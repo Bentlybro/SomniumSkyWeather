@@ -34,6 +34,10 @@ namespace SomniumSpace.Worlds.Bently.Weather
         public float maxRainRate = 7000f;
         public float maxSnowRate = 1400f;
 
+        [Header("Collision")]
+        [Tooltip("Stop rain/snow at solid surfaces (scene colliders) instead of falling through the deck/objects. Uses accurate World collision — if it costs too much on low-end VR, turn it off or lower the Max emission rates.")]
+        public bool collideWithWorld = true;
+
         ParticleSystem _rain, _snow;
         ParticleSystem.EmissionModule _rainEm, _snowEm;
         ParticleSystem.VelocityOverLifetimeModule _rainVel, _snowVel;
@@ -156,6 +160,8 @@ namespace SomniumSpace.Worlds.Bently.Weather
             vel.enabled = true;
             vel.space = ParticleSystemSimulationSpace.World;
             vel.y = new ParticleSystem.MinMaxCurve(-26f);
+
+            if (collideWithWorld) ConfigureCollision(ps, 1f);   // vanish (splash) the instant it hits a surface
         }
 
         void ConfigureSnow(ParticleSystem ps)
@@ -178,6 +184,27 @@ namespace SomniumSpace.Worlds.Bently.Weather
             noise.strength = 0.6f;
             noise.frequency = 0.25f;
             noise.scrollSpeed = 0.4f;
+
+            if (collideWithWorld) ConfigureCollision(ps, 0.5f);   // settle on the surface, then fade (no pass-through)
+        }
+
+        // Stop precipitation at solid surfaces (the scene's colliders) instead of dropping through the world.
+        // World collision = accurate 3D against scene colliders; the particle loses 'lifetimeLoss' of its
+        // remaining life on contact (1 = vanish like a splash, less = rest briefly then fade). Needs World
+        // simulation space (already set) so drops collide in world space as they fall past geometry.
+        static void ConfigureCollision(ParticleSystem ps, float lifetimeLoss)
+        {
+            var col = ps.collision;
+            col.enabled = true;
+            col.type = ParticleSystemCollisionType.World;
+            col.mode = ParticleSystemCollisionMode.Collision3D;
+            col.quality = ParticleSystemCollisionQuality.High;   // exact collision against scene colliders
+            col.dampen = 1f;                  // kill velocity on contact (no slide)
+            col.bounce = 0f;                  // no bounce
+            col.lifetimeLoss = lifetimeLoss;
+            col.radiusScale = 1f;
+            col.collidesWith = ~0;            // every layer
+            col.sendCollisionMessages = false;
         }
 
         static void EnsureMaterials()

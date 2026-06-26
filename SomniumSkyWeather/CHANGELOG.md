@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 — 2026-06-27
+
+- **Precipitation collision** — rain and snow now collide with the world (scene colliders) instead of falling through the deck/ground/objects. Rain splashes and vanishes on impact; snow settles on the surface then fades. New `Collide With World` toggle on `WeatherParticles` (turn off, or lower the Max emission rates, to save cost on low-end VR).
+
 ## 1.1.0 — 2026-06-26
 
 Night-sky & aurora quality pass.

@@ -67,7 +67,7 @@ SomniumSkyWeather renders the **entire sky — including raymarched volumetric c
 https://github.com/Bentlybro/SomniumSkyWeather.git?path=/SomniumSkyWeather
 ```
 
-Append `#v1.1.0` to pin a release. ⚠️ **Don't use this route for Somnium** (see the warning above).
+Append `#v1.2.0` to pin a release. ⚠️ **Don't use this route for Somnium** (see the warning above).
 
 Then:
 
