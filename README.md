@@ -52,22 +52,14 @@ SomniumSkyWeather renders the **entire sky — including raymarched volumetric c
 
 > ⚠️ **For Somnium worlds, install it under `Assets/` — do _not_ use the Package Manager (git URL).** Somnium's world build bundles your project's **`Assets/`** (plus your scripting assemblies) but **not the assets inside a UPM package** (`Packages/…`). Installed via Package Manager, the sky's shader, material and textures get left out of the upload → **black sky**. Putting the folder under `Assets/` is what pulls them into the bundle.
 
-**Recommended (Somnium) — put it in `Assets/`:**
+**Put the `SomniumSkyWeather` folder under `Assets/`:**
 
 - **Copy** the **`SomniumSkyWeather`** folder into your project's **`Assets/`** (e.g. `Assets/SomniumSkyWeather`), **or**
 - **`git clone`** it and move the inner **`SomniumSkyWeather`** folder into **`Assets/`**:
   ```
   git clone https://github.com/Bentlybro/SomniumSkyWeather.git
   ```
-  Make sure it ends up **inside `Assets/`** — Unity only sees assets under `Assets/`, and Somnium only ships what's there.
-
-**Non-Somnium URP projects only — Package Manager (git URL):** *Window ▸ Package Manager ▸ ➕ ▸ Add package from git URL…* →
-
-```
-https://github.com/Bentlybro/SomniumSkyWeather.git?path=/SomniumSkyWeather
-```
-
-Append `#v1.2.1` to pin a release. ⚠️ **Don't use this route for Somnium** (see the warning above).
+  Just make sure it ends up **inside `Assets/`** — Unity only sees assets under `Assets/`, and Somnium only ships what's there.
 
 Then:
 
