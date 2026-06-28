@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.0 — 2026-06-28
+
+- **Reworked lightning** — storms now throw actual **jagged bolts** from the clouds to the ground near you, each with a **bright local light** at the strike, plus a **directional flash** that lights up the clouds and sky *around* the bolt (instead of the old flat whole-sky flash). Strikes are more frequent, and each weather type's `Lightning` value sets its strike rate. New tuning controls on `WeatherParticles`: Strike Radius / Height / Flash.
+
 ## 1.3.0 — 2026-06-28
 
 - **VR fix** — the sky now renders in **both eyes**. Added single-pass-instanced stereo support to the skybox shader (it previously drew in one eye only in VR).

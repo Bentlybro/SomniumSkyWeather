@@ -59,6 +59,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
         [Range(0f, 0.2f)] public float cloudSpeed = 0.03f;
         [Tooltip("Allow storm lightning flashes (driven by each weather's Lightning value).")]
         public bool lightningEnabled = true;
+        [System.NonSerialized] public bool lightningStruck;   // true on the single frame a strike fires (WeatherParticles draws the bolt + local light)
 
         // ---------------- Cloud look (global; weather drives coverage/density/colour) ----------------
         [Header("Cloud Look")]
@@ -377,20 +378,21 @@ namespace SomniumSpace.Worlds.Bently.Weather
         void ApplyLightning(float dt)
         {
             float freq = (_current != null) ? _current.lightning : 0f;
+            lightningStruck = false;
             if (lightningEnabled && freq > 0.02f && Application.isPlaying)
             {
                 _nextFlash -= dt;
                 if (_nextFlash <= 0f)
                 {
                     _flash = 1f;                                            // strike
-                    _nextFlash = Random.Range(2.5f, 11f) / Mathf.Max(0.1f, freq);
+                    lightningStruck = true;                                 // WeatherParticles draws a bolt + local flash this frame
+                    _nextFlash = Random.Range(1.0f, 4.0f) / Mathf.Max(0.1f, freq);
                 }
             }
             _flash = Mathf.Max(0f, _flash - dt * 4f);                       // quick decay
-            float fl = _flash * freq;
-            Shader.SetGlobalFloat("_CloudFlash", fl);                       // clouds light up from within
-            if (fl > 0.01f)
-                RenderSettings.ambientLight += new Color(0.55f, 0.60f, 0.80f) * fl;  // scene flash
+            // flash intensity (decaying). The shader concentrates it AROUND the strike direction
+            // (_CloudFlashDir, set by WeatherParticles) so the sky + clouds near the bolt light up — not the whole dome.
+            Shader.SetGlobalFloat("_CloudFlash", _flash * freq);
         }
 
         void UpdateAurora(float dt)

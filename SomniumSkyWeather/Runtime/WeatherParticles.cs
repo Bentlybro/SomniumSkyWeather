@@ -38,11 +38,22 @@ namespace SomniumSpace.Worlds.Bently.Weather
         [Tooltip("Stop rain/snow at solid surfaces (scene colliders) instead of falling through the deck/objects. Uses accurate World collision — if it costs too much on low-end VR, turn it off or lower the Max emission rates.")]
         public bool collideWithWorld = true;
 
+        [Header("Lightning")]
+        [Tooltip("On a strike, draw an actual bolt from the clouds + flash a bright point light at it so it lights that AREA locally. Off = just the cloud glow.")]
+        public bool lightningBolts = true;
+        [Tooltip("How far around the viewer bolts can land.")]
+        public float strikeRadius = 60f;
+        [Tooltip("Height the bolt drops from.")]
+        public float strikeHeight = 40f;
+        [Tooltip("Brightness of the point light flashed at each strike.")]
+        public float strikeFlash = 30f;
+
         ParticleSystem _rain, _snow;
         ParticleSystem.EmissionModule _rainEm, _snowEm;
         ParticleSystem.VelocityOverLifetimeModule _rainVel, _snowVel;
         Transform _rig;
-        static Material _rainMat, _snowMat;
+        static Material _rainMat, _snowMat, _boltMat;
+        LineRenderer _bolt; Light _flashLight; float _boltLife, _flashLife, _flashPeak;
 
         void OnEnable()
         {
@@ -91,6 +102,26 @@ namespace SomniumSpace.Worlds.Bently.Weather
             _snowVel.z = new ParticleSystem.MinMaxCurve(wz * windAmt * 7f);
             _rainVel.x = new ParticleSystem.MinMaxCurve(wx * windAmt * 12f);
             _rainVel.z = new ParticleSystem.MinMaxCurve(wz * windAmt * 12f);
+
+            // --- lightning: draw a bolt + flash a local light when SkyWeather signals a strike ---
+            if (lightningBolts && _bolt != null)
+            {
+                if (sw2 != null && sw2.lightningStruck) Strike();
+                float ldt = Time.deltaTime;
+                if (_boltLife > 0f)
+                {
+                    _boltLife -= ldt;
+                    _bolt.enabled = _boltLife > 0.11f || (_boltLife > 0.02f && _boltLife < 0.07f);   // quick flicker
+                    if (_boltLife <= 0f) _bolt.enabled = false;
+                }
+                if (_flashLife > 0f)
+                {
+                    _flashLife -= ldt;
+                    float k = Mathf.Clamp01(_flashLife / 0.30f);
+                    _flashLight.intensity = _flashPeak * k * k;     // bright, then fast decay
+                    if (_flashLife <= 0f) _flashLight.enabled = false;
+                }
+            }
         }
 
         void Build()
@@ -111,9 +142,98 @@ namespace SomniumSpace.Worlds.Bently.Weather
             _snowEm = _snow.emission;
             _snowVel = _snow.velocityOverLifetime;
 
+            if (lightningBolts) BuildLightning();
+
             // play AFTER sub-emitters are registered so the splash triggers reliably
             _rain.Play();
             _snow.Play();
+        }
+
+        void BuildLightning()
+        {
+            EnsureBoltMaterial();
+            var bgo = new GameObject("LightningBolt");
+            bgo.transform.SetParent(transform, false);
+            _bolt = bgo.AddComponent<LineRenderer>();
+            _bolt.useWorldSpace = true;
+            _bolt.material = _boltMat;
+            _bolt.widthCurve = AnimationCurve.Linear(0f, 0.5f, 1f, 0.12f);   // wider up top, thin at the ground
+            _bolt.numCapVertices = 2;
+            _bolt.alignment = LineAlignment.View;
+            _bolt.textureMode = LineTextureMode.Stretch;
+            _bolt.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            _bolt.enabled = false;
+
+            var lgo = new GameObject("LightningFlash");
+            lgo.transform.SetParent(transform, false);
+            _flashLight = lgo.AddComponent<Light>();
+            _flashLight.type = LightType.Point;
+            _flashLight.color = new Color(0.82f, 0.88f, 1f);
+            _flashLight.range = strikeRadius * 1.6f;
+            _flashLight.intensity = 0f;
+            _flashLight.shadows = LightShadows.None;
+            _flashLight.enabled = false;
+        }
+
+        // One jagged bolt from the clouds to the ground at a random spot near the viewer, plus a bright
+        // point-light flash at the strike so it lights that AREA — not a flash across the whole sky.
+        void Strike()
+        {
+            Transform tgt = followTarget;
+            if (tgt == null && Camera.main != null) tgt = Camera.main.transform;
+            if (tgt == null) tgt = transform;
+            Vector3 c = tgt.position;
+            float ang = Random.value * 6.2831853f;
+            float dist = Random.Range(8f, strikeRadius);
+            Vector3 ground = new Vector3(c.x + Mathf.Cos(ang) * dist, c.y - 1.6f, c.z + Mathf.Sin(ang) * dist);
+            Vector3 top = ground + Vector3.up * strikeHeight;
+
+            int n = 13;
+            _bolt.positionCount = n;
+            for (int i = 0; i < n; i++)
+            {
+                float t = i / (float)(n - 1);
+                Vector3 p = Vector3.Lerp(top, ground, t);
+                if (i > 0 && i < n - 1)
+                {
+                    float j = strikeHeight * 0.06f;
+                    p.x += Random.Range(-j, j);
+                    p.z += Random.Range(-j, j);
+                }
+                _bolt.SetPosition(i, p);
+            }
+            _bolt.enabled = true;
+            _boltLife = 0.16f;
+
+            _flashLight.transform.position = Vector3.Lerp(ground, top, 0.3f);
+            _flashLight.enabled = true;
+            _flashPeak = strikeFlash * Random.Range(0.8f, 1.2f);
+            _flashLife = 0.30f;
+
+            // tell the sky shader which way the strike is, so the flash lights the sky + clouds around it
+            Vector3 fdir = (top - c).normalized;
+            Shader.SetGlobalVector("_CloudFlashDir", new Vector4(fdir.x, fdir.y, fdir.z, 0f));
+        }
+
+        static void EnsureBoltMaterial()
+        {
+            if (_boltMat != null) return;
+            Shader s = Shader.Find("Universal Render Pipeline/Particles/Unlit");
+            if (s == null) s = Shader.Find("Sprites/Default");
+            _boltMat = new Material(s) { name = "LightningBolt", hideFlags = HideFlags.DontSave };
+            Color c = new Color(0.85f, 0.9f, 1f, 1f);
+            if (_boltMat.HasProperty("_BaseColor")) _boltMat.SetColor("_BaseColor", c);
+            if (_boltMat.HasProperty("_Color")) _boltMat.SetColor("_Color", c);
+            // additive so the bolt reads as bright light
+            if (_boltMat.HasProperty("_Surface")) _boltMat.SetFloat("_Surface", 1f);
+            if (_boltMat.HasProperty("_Blend")) _boltMat.SetFloat("_Blend", 1f);
+            if (_boltMat.HasProperty("_SrcBlend")) _boltMat.SetFloat("_SrcBlend", (float)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            if (_boltMat.HasProperty("_DstBlend")) _boltMat.SetFloat("_DstBlend", (float)UnityEngine.Rendering.BlendMode.One);
+            if (_boltMat.HasProperty("_ZWrite")) _boltMat.SetFloat("_ZWrite", 0f);
+            _boltMat.EnableKeyword("_SURFACE_TYPE_TRANSPARENT");
+            _boltMat.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            _boltMat.SetOverrideTag("RenderType", "Transparent");
+            _boltMat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
         }
 
         ParticleSystem MakeSystem(string name, Material mat, ParticleSystemRenderMode mode)

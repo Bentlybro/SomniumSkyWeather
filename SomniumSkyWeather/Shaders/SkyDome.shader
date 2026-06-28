@@ -101,6 +101,7 @@ Shader "Bently/SkyDome"
             float4 _WindDir;  // xy = horizontal wind (x,z), scaled by speed
             float  _CloudOpacity; // master 0..1 fade for clouds (weather)
             float  _CloudFlash;   // lightning flash 0..1 (set by the controller)
+            float4 _CloudFlashDir; // xyz = world direction from the viewer to the current strike
 
             sampler3D _CloudNoiseTex;  // baked tileable Worley FBM (R = base billows, GBA = detail)
             samplerCUBE _StarSkyTex;   // baked star field + Milky Way band
@@ -281,7 +282,9 @@ Shader "Bently/SkyDome"
                         float ms = (1.0 - exp(-tau * 0.7)) * 0.45;                     // multi-scatter / powder fill
                         float energy = lightT * (phase + 0.55) * (1.0 + silver * 1.6) + ms * 0.55 + 0.05 * dayAmt + 0.03;
                         float3 lit = (sunCol * energy + _CloudShadowColor.rgb * 0.22 * (1.0 - lightT) * dayAmt) * lightLevel;
-                        lit += _CloudColor.rgb * _CloudFlash * (0.6 + 0.8 * (1.0 - lightT));  // lightning lights the cloud from within
+                        // lightning: clouds light up from within, strongest AROUND the strike direction (not the whole dome)
+                        float flashLobe = 0.12 + 1.7 * pow(saturate(dot(rd, _CloudFlashDir.xyz)), 2.0);
+                        lit += _CloudColor.rgb * _CloudFlash * flashLobe * (0.55 + 0.8 * (1.0 - lightT));
                         lit += _AuroraColor2.rgb * (_AuroraIntensity * auroraGlow * 0.40);    // glow ONLY where the curtain hangs overhead
                         lit = lerp(skyColor, lit, exp(-t * _CloudFade));               // atmospheric distance fade
 
@@ -430,6 +433,9 @@ Shader "Bently/SkyDome"
                 // aurora: compute once. Most of it sits behind the clouds (added to sky here)...
                 float3 auroraCol = auroraColor(rd);
                 sky += auroraCol;
+
+                // lightning flash lights the SKY around the strike too (so the glow shows in gaps between clouds)
+                sky += _CloudColor.rgb * _CloudFlash * pow(saturate(dot(rd, _CloudFlashDir.xyz)), 2.5) * 0.7;
 
                 // clouds (composite over sky) — interleaved-gradient-noise dither (smooth, not salt-and-pepper)
                 float ign = frac(52.9829189 * frac(dot(i.pos.xy, float2(0.06711056, 0.00583715))));
