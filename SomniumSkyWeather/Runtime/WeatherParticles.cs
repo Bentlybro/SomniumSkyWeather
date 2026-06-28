@@ -31,12 +31,12 @@ namespace SomniumSpace.Worlds.Bently.Weather
         public float areaRadius = 28f;
 
         [Header("Max emission (at intensity 1)")]
-        public float maxRainRate = 7000f;
-        public float maxSnowRate = 1400f;
+        public float maxRainRate = 4500f;
+        public float maxSnowRate = 800f;
 
         [Header("Collision")]
-        [Tooltip("Stop rain/snow at solid surfaces (scene colliders) instead of falling through the deck/objects. Uses accurate World collision — if it costs too much on low-end VR, turn it off or lower the Max emission rates.")]
-        public bool collideWithWorld = true;
+        [Tooltip("Stop rain/snow at solid surfaces (scene colliders) instead of falling through the deck/objects. Off by default — it's the most expensive feature; turn it on if you want splashes/landing and can afford it.")]
+        public bool collideWithWorld = false;
 
         [Header("Lightning")]
         [Tooltip("On a strike, draw an actual bolt from the clouds + flash a bright point light at it so it lights that AREA locally. Off = just the cloud glow.")]
@@ -245,7 +245,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
 
             var main = ps.main;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.maxParticles = 12000;
+            main.maxParticles = 8000;
             main.playOnAwake = false;   // Build() plays explicitly once sub-emitters are wired
 
             var em = ps.emission;
@@ -285,13 +285,13 @@ namespace SomniumSpace.Worlds.Bently.Weather
             main.startSize = new ParticleSystem.MinMaxCurve(0.015f, 0.04f);
             main.startColor = new Color(0.82f, 0.88f, 0.97f, 0.7f);
             main.gravityModifier = 2.2f;          // pop up, then fall straight back down
-            main.maxParticles = 2000;
+            main.maxParticles = 1200;
             main.playOnAwake = false;
 
             var em = sp.emission;
             em.enabled = true;
             em.rateOverTime = 0f;                 // emits only when the sub-emitter is triggered
-            em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)4, (short)7, 1, 0.01f) });
+            em.SetBursts(new ParticleSystem.Burst[] { new ParticleSystem.Burst(0f, (short)3, (short)5, 1, 0.01f) });
 
             var shape = sp.shape;
             shape.enabled = true;
@@ -302,7 +302,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
 
             var r = go.GetComponent<ParticleSystemRenderer>();
             r.renderMode = ParticleSystemRenderMode.Billboard;
-            r.material = _rainMat;
+            r.material = _snowMat;   // splash droplets are round dots, not streaks
             r.alignment = ParticleSystemRenderSpace.View;
             r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             r.receiveShadows = false;
@@ -317,8 +317,8 @@ namespace SomniumSpace.Worlds.Bently.Weather
             var main = ps.main;
             main.startLifetime = 0.6f;
             main.startSpeed = 34f;
-            main.startSize = new ParticleSystem.MinMaxCurve(0.03f, 0.05f);
-            main.startColor = new Color(0.74f, 0.80f, 0.92f, 0.6f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.035f);   // thinner streaks
+            main.startColor = new Color(0.80f, 0.86f, 0.97f, 0.45f);          // cooler + more translucent
             main.gravityModifier = 1.3f;
             main.startRotation = 0f;
 
@@ -365,7 +365,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
             col.enabled = true;
             col.type = ParticleSystemCollisionType.World;
             col.mode = ParticleSystemCollisionMode.Collision3D;
-            col.quality = ParticleSystemCollisionQuality.High;   // exact collision against scene colliders
+            col.quality = ParticleSystemCollisionQuality.Medium; // cached scene collision — far cheaper than a per-drop raycast (High), still stops at surfaces
             col.dampen = 1f;                  // kill velocity on contact (no slide)
             col.bounce = 0f;                  // no bounce
             col.lifetimeLoss = lifetimeLoss;
@@ -386,7 +386,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
             TrySetTransparent(_snowMat, dot);
 
             _rainMat = new Material(s) { name = "RainParticle", hideFlags = HideFlags.DontSave };
-            TrySetTransparent(_rainMat, dot);
+            TrySetTransparent(_rainMat, BuildRainStreak());   // sharp thin streak, not a stretched blob
         }
 
         static void TrySetTransparent(Material m, Texture tex)
@@ -424,6 +424,28 @@ namespace SomniumSpace.Worlds.Bently.Weather
                 float a = Mathf.Clamp01(1f - d);
                 a = a * a;
                 px[y * N + x] = new Color(1f, 1f, 1f, a);
+            }
+            t.SetPixels(px);
+            t.Apply();
+            return t;
+        }
+
+        // A thin, sharp rain streak: a bright narrow vertical line that softens at the head + tail.
+        // Stretched along velocity this reads as a real raindrop streak instead of a fuzzy white smear.
+        static Texture2D BuildRainStreak()
+        {
+            const int W = 16, H = 64;
+            var t = new Texture2D(W, H, TextureFormat.RGBA32, false) { hideFlags = HideFlags.DontSave, wrapMode = TextureWrapMode.Clamp };
+            var px = new Color[W * H];
+            for (int y = 0; y < H; y++)
+            for (int x = 0; x < W; x++)
+            {
+                float dx = (x + 0.5f) / W - 0.5f;                            // -0.5..0.5 across the width
+                float dy = (y + 0.5f) / H;                                    // 0..1 along the length
+                float across = Mathf.Clamp01(1f - Mathf.Abs(dx) / 0.22f);    // thin centred line
+                across *= across;                                            // sharpen the core
+                float along = Mathf.SmoothStep(0f, 0.16f, dy) * Mathf.SmoothStep(1f, 0.82f, dy);  // soft head + tail
+                px[y * W + x] = new Color(1f, 1f, 1f, across * along);
             }
             t.SetPixels(px);
             t.Apply();

@@ -72,7 +72,7 @@ namespace SomniumSpace.Worlds.Bently.Weather
         [Range(0f, 0.2f)] public float cloudFade = 0.045f;
         [Range(20f, 400f)] public float curvatureRadius = 90f;
         [Tooltip("Cloud raymarch steps. Lower = faster — use ~24 for VR.")]
-        [Range(12, 64)] public int cloudSteps = 40;
+        [Range(12, 64)] public int cloudSteps = 36;
         [Tooltip("Strength of the higher, wispier cloud layer stacked above the main deck (0 = off).")]
         [Range(0f, 1f)] public float highCloudAmount = 0.5f;
         [Tooltip("Feature size of the high wispy layer — higher = finer/cirrus-like, lower = bigger patches.")]

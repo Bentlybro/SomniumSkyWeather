@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1 — 2026-06-28
+
+- **Performance pass** — large drop in GPU/CPU cost. World collision is now **off by default** (toggle kept — it was the single heaviest feature), the cloud light-march is cut 6→4 steps, the aurora march 36→24, the high-cloud layer is skipped during the light march, and particle caps + rain rate are lower. Cloud Steps default tuned to 36 (smooth, but lighter than the old 40).
+- **Nicer rain** — drops use a proper thin streak texture instead of a stretched dot (which smeared), thinner and more translucent; splash droplets stay round.
+
 ## 1.4.0 — 2026-06-28
 
 - **Reworked lightning** — storms now throw actual **jagged bolts** from the clouds to the ground near you, each with a **bright local light** at the strike, plus a **directional flash** that lights up the clouds and sky *around* the bolt (instead of the old flat whole-sky flash). Strikes are more frequent, and each weather type's `Lightning` value sets its strike rate. New tuning controls on `WeatherParticles`: Strike Radius / Height / Flash.

@@ -51,8 +51,8 @@ MonoBehaviour:
   followTarget: {fileID: 0}
   spawnHeight: 16
   areaRadius: 28
-  maxRainRate: 7000
-  maxSnowRate: 1400
+  maxRainRate: 4500
+  maxSnowRate: 800
 --- !u!1 &8287772166915130302
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +179,7 @@ MonoBehaviour:
   cloudAbsorption: 1.3
   cloudFade: 0.045
   curvatureRadius: 90
-  cloudSteps: 40
+  cloudSteps: 36
   sunSize: 0.0009
   moonSize: 0.0016
   starIntensity: 1.4

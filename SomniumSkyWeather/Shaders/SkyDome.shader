@@ -80,7 +80,7 @@ Shader "Bently/SkyDome"
             #include "UnityCG.cginc"
 
             #define CLOUD_STEPS 48
-            #define LIGHT_STEPS 6
+            #define LIGHT_STEPS 4
             #define PI 3.14159265
 
             // --- art-directed params ---
@@ -182,7 +182,7 @@ Shader "Bently/SkyDome"
                 density *= heightGradient(h, _CloudType);
                 // second, HIGHER layer: thin wispy clouds near the top of the shell with their own
                 // finer noise — so the sky reads as stacked cloud heights, not one flat deck.
-                if (h > 0.5 && _CloudHighAmount > 0.001)
+                if (h > 0.5 && _CloudHighAmount > 0.001 && cheap == 0)   // skip the high layer in the cheap light march
                 {
                     float band = saturate(remap(h, 0.58, 0.72, 0.0, 1.0)) * saturate(remap(h, 0.90, 1.0, 1.0, 0.0));
                     float wn = tex3D(_CloudNoiseTex, sp * (_CloudScale * _CloudHighScale) + 53.3).r;
@@ -338,12 +338,12 @@ Shader "Bently/SkyDome"
                 float aTop = aBottom + 7.0;
                 float t0 = aBottom / rd.y;
                 float t1 = aTop / rd.y;
-                float dt = (t1 - t0) / 36.0;
+                float dt = (t1 - t0) / 24.0;
                 float t = t0;
                 float wind = _Time.y * 0.015;
 
                 [loop]
-                for (int i = 0; i < 36; i++)
+                for (int i = 0; i < 24; i++)
                 {
                     float3 p = rd * t;
                     float h = saturate((p.y - aBottom) / (aTop - aBottom));    // 0 bottom .. 1 top of the band
@@ -367,7 +367,7 @@ Shader "Bently/SkyDome"
                     acc += col * ribbon * (0.3 + 1.2 * rays) * vfall * env * distFade;
                     t += dt;
                 }
-                return acc * (13.0 / 36.0) * _AuroraIntensity;
+                return acc * (13.0 / 24.0) * _AuroraIntensity;
             }
 
             fixed4 frag (v2f i) : SV_Target
