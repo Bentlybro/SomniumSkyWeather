@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 — 2026-06-28
+
+- **VR fix** — the sky now renders in **both eyes**. Added single-pass-instanced stereo support to the skybox shader (it previously drew in one eye only in VR).
+- **Stacked cloud layers** — a higher, wispier cloud layer now sits above the main deck, so the sky reads as cloud at multiple heights instead of one flat band, plus cohesion tweaks so the masses hold together.
+- **New cloud controls** (Cloud Look): **High Cloud Amount** (0 = off) and **High Cloud Scale** (feature size of the high layer).
+
 ## 1.2.2 — 2026-06-28
 
 - **Full-dome coverage fix** — Overcast, Storm and Blizzard now cover the sky all the way to the zenith instead of leaving a clear "hole" straight up (coverage-driven cloud deck fills the thin overhead path). Fog now blankets the whole dome too, rather than fading out overhead.

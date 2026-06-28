@@ -52,7 +52,7 @@ namespace SomniumSpace.Worlds.Bently.Weather.EditorTools
                 Prop("cloudType"); Prop("cloudScale"); Prop("cloudDetail");
                 Prop("cloudBottom"); Prop("cloudThickness"); Prop("cloudAbsorption");
                 Prop("cloudFade"); Prop("curvatureRadius"); Prop("cloudSpeed");
-                Prop("cloudSteps");
+                Prop("cloudSteps"); Prop("highCloudAmount"); Prop("highCloudScale");
             });
 
             Section("Sun / Moon / Stars", ref _fSky, () =>

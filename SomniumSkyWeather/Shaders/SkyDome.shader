@@ -51,6 +51,8 @@ Shader "Bently/SkyDome"
         _CloudPlanetRadius ("Curvature Radius", Range(20, 400)) = 90
         _CloudFade       ("Distance Fade", Range(0, 0.2)) = 0.045
         _CloudSteps      ("Cloud Steps (lower = faster, for VR)", Range(12, 64)) = 40
+        _CloudHighAmount ("High Cloud Amount", Range(0, 1)) = 0.5
+        _CloudHighScale  ("High Cloud Scale", Range(0.01, 0.2)) = 0.05
 
         [Header(Aurora)]
         [HDR] _AuroraColor1 ("Aurora Color (bottom)", Color) = (0.7, 0.2, 1.0, 1)
@@ -89,7 +91,7 @@ Shader "Bently/SkyDome"
             half4 _MoonColor; half _MoonSize, _MoonGlow, _MoonPhase;
             half  _StarIntensity, _StarDensity; half4 _GalaxyColor;
             half4 _CloudColor, _CloudShadowColor;
-            half  _CloudCoverage, _CloudDensity, _CloudScale, _CloudHeight, _CloudThickness, _CloudAbsorption, _CloudSpeed, _CloudType, _CloudDetail, _CloudPlanetRadius, _CloudFade, _CloudSteps;
+            half  _CloudCoverage, _CloudDensity, _CloudScale, _CloudHeight, _CloudThickness, _CloudAbsorption, _CloudSpeed, _CloudType, _CloudDetail, _CloudPlanetRadius, _CloudFade, _CloudSteps, _CloudHighAmount, _CloudHighScale;
             half  _AuroraIntensity, _AuroraCoverage;   // set by the controller (intensity gated to night)
             half4 _AuroraColor1, _AuroraColor2, _AuroraColor3;
 
@@ -104,12 +106,14 @@ Shader "Bently/SkyDome"
             samplerCUBE _StarSkyTex;   // baked star field + Milky Way band
             sampler2D _MoonTex;        // baked moon albedo (maria + craters)
 
-            struct appdata { float4 vertex : POSITION; };
-            struct v2f { float4 pos : SV_POSITION; float3 dir : TEXCOORD0; };
+            struct appdata { float4 vertex : POSITION; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct v2f { float4 pos : SV_POSITION; float3 dir : TEXCOORD0; UNITY_VERTEX_OUTPUT_STEREO };
 
             v2f vert (appdata v)
             {
                 v2f o;
+                UNITY_SETUP_INSTANCE_ID(v);                  // VR: pick up the eye/instance id
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);    // VR: emit per-eye so the sky draws in BOTH eyes
                 o.pos = UnityObjectToClipPos(v.vertex);
                 o.dir = v.vertex.xyz;
                 return o;
@@ -175,12 +179,21 @@ Shader "Bently/SkyDome"
                 density = max(density, saturate((_CloudCoverage - 0.72) / 0.26) * 0.7);
                 // cumulus vertical shaping
                 density *= heightGradient(h, _CloudType);
+                // second, HIGHER layer: thin wispy clouds near the top of the shell with their own
+                // finer noise — so the sky reads as stacked cloud heights, not one flat deck.
+                if (h > 0.5 && _CloudHighAmount > 0.001)
+                {
+                    float band = saturate(remap(h, 0.58, 0.72, 0.0, 1.0)) * saturate(remap(h, 0.90, 1.0, 1.0, 0.0));
+                    float wn = tex3D(_CloudNoiseTex, sp * (_CloudScale * _CloudHighScale) + 53.3).r;
+                    float wisp = saturate(remap(wn, 1.0 - _CloudCoverage * 0.85, 1.0, 0.0, 1.0));
+                    density = max(density, wisp * band * _CloudHighAmount);
+                }
                 // erode the edges with higher-frequency detail (soft, no core speckle)
                 if (cheap == 0 && density > 0.0)
                 {
                     float4 nd = tex3D(_CloudNoiseTex, sp * (_CloudScale * 0.16) + 21.7);
                     float hi = nd.g * 0.5 + nd.b * 0.35 + nd.a * 0.15;
-                    density = saturate(density - hi * _CloudDetail * 0.35 * (1.0 - density));
+                    density = saturate(density - hi * _CloudDetail * 0.26 * (1.0 - density));
                 }
                 return density * _CloudDensity;
             }
@@ -356,6 +369,7 @@ Shader "Bently/SkyDome"
 
             fixed4 frag (v2f i) : SV_Target
             {
+                UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);   // VR: resolve the correct eye in the fragment
                 float3 rd = normalize(i.dir);
                 float elev = rd.y;
 

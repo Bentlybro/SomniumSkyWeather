@@ -72,6 +72,10 @@ namespace SomniumSpace.Worlds.Bently.Weather
         [Range(20f, 400f)] public float curvatureRadius = 90f;
         [Tooltip("Cloud raymarch steps. Lower = faster — use ~24 for VR.")]
         [Range(12, 64)] public int cloudSteps = 40;
+        [Tooltip("Strength of the higher, wispier cloud layer stacked above the main deck (0 = off).")]
+        [Range(0f, 1f)] public float highCloudAmount = 0.5f;
+        [Tooltip("Feature size of the high wispy layer — higher = finer/cirrus-like, lower = bigger patches.")]
+        [Range(0.01f, 0.2f)] public float highCloudScale = 0.05f;
 
         // ---------------- Sun / Moon / Stars look ----------------
         [Header("Sun / Moon / Stars Look")]
@@ -309,6 +313,8 @@ namespace SomniumSpace.Worlds.Bently.Weather
             _skyMat.SetFloat("_MoonSize", moonSize);
             _skyMat.SetFloat("_StarIntensity", starIntensity);
             _skyMat.SetFloat("_CloudSteps", cloudSteps);
+            _skyMat.SetFloat("_CloudHighAmount", highCloudAmount);
+            _skyMat.SetFloat("_CloudHighScale", highCloudScale);
         }
 
         void ApplyLighting()
