@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 — 2026-06-28
+
+- **Full-dome coverage fix** — Overcast, Storm and Blizzard now cover the sky all the way to the zenith instead of leaving a clear "hole" straight up (coverage-driven cloud deck fills the thin overhead path). Fog now blankets the whole dome too, rather than fading out overhead.
+
 ## 1.2.1 — 2026-06-27
 
 - **Rain splash particles** — drops kick up a little crown of droplets where they land (a collision-triggered sub-emitter on the rain system). Follows the `Collide With World` toggle.

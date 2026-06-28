@@ -170,6 +170,9 @@ Shader "Bently/SkyDome"
                 float4 n = tex3D(_CloudNoiseTex, sp * (_CloudScale * 0.04));
                 // coverage threshold on the base billow noise -> where clouds exist
                 float density = saturate(remap(n.r, 1.0 - _CloudCoverage, 1.0, 0.0, 1.0));
+                // overcast deck: at high coverage, fill the gaps so the whole dome is covered (incl.
+                // straight up) instead of leaving a clear hole where the zenith path is thinnest.
+                density = max(density, saturate((_CloudCoverage - 0.72) / 0.26) * 0.7);
                 // cumulus vertical shaping
                 density *= heightGradient(h, _CloudType);
                 // erode the edges with higher-frequency detail (soft, no core speckle)
@@ -423,10 +426,10 @@ Shader "Bently/SkyDome"
 
                 col *= _Exposure;
 
-                // fog: blend the lower sky toward the fog colour (so fog is visible against the sky,
-                // not just on scene geometry). Strong at the horizon, fades out toward the zenith.
-                float fogH = saturate(1.0 - elev * 1.8);
-                col = lerp(col, _SkyFogColor.rgb, saturate(_SkyFog * fogH));
+                // fog: blend the sky toward the fog colour (visible against the sky, not just geometry).
+                // Blankets the WHOLE dome (incl. straight up) when thick — only a touch stronger near the horizon.
+                float fogH = saturate(1.0 - elev * 0.2);
+                col = lerp(col, _SkyFogColor.rgb, saturate(_SkyFog * fogH * 1.5));
 
                 // Kill 8-bit banding in the smooth dark sky/fog gradients. Dark night skies are where
                 // quantization "rungs"/blobs show worst, so add a sub-LSB triangular-PDF dither (two
